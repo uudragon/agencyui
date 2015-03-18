@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>优优龙代理商</title>
+<link rel="stylesheet" type="text/css" href="../../js/jquery-easyui-1.2.6/themes/gray/easyui.css">
+<link rel="stylesheet" type="text/css" href="../../styles/common.css">
+<link rel="stylesheet" type="text/css" href="../../js/jquery-easyui-1.2.6/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="../../js/jquery-easyui-1.2.6/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="../../styles/grid.css">
+
+<script type="text/javascript" src="../../js/jquery-easyui-1.2.6/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../../js/jquery-easyui-1.2.6/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/jquery-easyui-1.2.6/locale/easyui-lang-zh_CN.js" ></script>
+<script type="text/javascript" src="../../js/GridSearcher.js"></script>
+<script type="text/javascript" src="../../js/area.js" ></script>
+<script type="text/javascript" src="../../js/uuid.js" ></script>
+<script type="text/javascript" src="../../js/dateformat.js" ></script>
+<script type="text/javascript" src="../../js/formdata.js" ></script>
+<script type="text/javascript" src="../../js/json2.js" ></script>
+<script type="text/javascript" src="../../js/cookies.js" ></script>
+
+</head>
+
+<script type="text/javascript" >
+
+	$(function() {
+
+		var gs = new GridSearcher({
+			paramName:'params',
+			prependTo:'listDiv',
+			gridId: 'orders',
+			disabled: false,
+			titleItems:[{
+						 label:'新建订单',
+						 handler:function(){alert();},
+						 image:'icon-add'
+			}],
+			items:[{
+					label:'姓名',
+					type:'text',
+					name:'customer_name'
+				},{
+					label:'电话',
+					type:'text',
+					name:'phone'
+				}]
+		});
+		loadGrid(1,10,gs);
+		
+	});
+	var selected;
+	function loadGrid(pn,ps,gs){
+		$('#orders').datagrid({
+				title:'订单列表',
+				height:430,
+				nowrap: false,
+				striped: true,
+				url:'/atnew/ws/agencyOrder',
+				method:'get',
+				idField:'code',
+				singleSelect:true,
+				queryParams:{"pageSize":ps,"pageNo":pn,"params":gs.getQword()},
+
+				columns:[[
+					{field:'order_no',title:'订单编号',width:130},
+					{field:'customer.name',title:'客户姓名',width:80,formatter:function(value,rowData,rowIndex){return rowData.customer.name;}},
+					{field:'customer.phone',title:'客户电话',width:100,formatter:function(value,rowData,rowIndex){return rowData.customer.phone;}},
+					{field:'customer.address',title:'详细地址',width:180,formatter:function(value,rowData,rowIndex){return rowData.customer.province+rowData.customer.city+(rowData.customer.district==null?"":rowData.customer.district)+rowData.customer.address;}},
+					{field:'amount',title:'订单金额',width:80},
+					{field:'packag',title:'订单类型',width:80},
+					{field:'audit',title:'订单状态',width:80,formatter:function(value,rowData,rowIndex){ 
+																						if(value==1){return "待审核";}
+																						if(value==2){return "审核中";}
+																						if(value==3){return "无效";}
+																						if(value==4){return "审核通过";}
+																					}},
+					{field:'create_time',title:'下单时间',width:110},
+					{field:'source',title:'订单来源',width:80,formatter:function(value,rowData,rowIndex){
+																						if(value==31) return "本地录入";
+																						if(value==32) return "网站广告";
+																					}},
+					{field:'workflow',title:'收货状态',width:80,formatter:function(value,rowData,rowIndex){
+																						if(value==6) {return "已完成";}
+																						else if(value==5) {return "部分发货";}
+																						else { return "待发货";} 
+																					}}
+				]],
+				pagination:true,
+				rownumbers:true,
+				onSelect:function(rowIndex, rowData){
+					selected = rowData;
+				},
+				onDblClickCell:function(rowIndex, field, value){
+					$('#singleorder').dialog({
+						title: '查看订单',
+						width: 800,
+						height: 400,
+						href: 'singleorder.html',
+						modal: true,
+						buttons:[{
+								text:'关闭',
+								handler:function(){
+									$('#singleorder').dialog('close');
+								}
+							}],
+						onClose:function(){
+								$("#singleorder").dialog("destroy",false);
+								$(document.body).append($("<div id='singleorder'>"));
+						},
+						onLoad:function(){
+								$("#singleForm").find("#province").combobox({
+									valueField:'id',  
+									textField:'text',
+									data:getProvince(),
+									onSelect:function( record ){
+										$("#city").combobox({
+											valueField:'id',  
+											textField:'text',
+											data:getCity(record.index),
+											onSelect:function(record){
+												$("#district").combobox({
+													valueField:'id',  
+													textField:'text',
+													data:getDistrict(record.index)
+												})
+											}
+										});
+									}
+								});
+								$.ajax({
+									url:"/atnew/ws/agencyOrder/"+selected.id,
+									type:"get",
+									dataType:"json",
+									success:function( data ){
+										setFormData($("#singleForm"),data);
+									}
+								});
+								$.ajax({
+										url:"/atnew/ws/agencyOrder/" + selected.order_no + "/split/",
+										type:"get",
+										dataType:"json",
+										success:function( data ){
+											if($("#suborder").find("tr").length==1){
+												for( var i = 0; i < data.length; i++ ){
+													var tr=$("<tr style='text-align: center; COLOR: #0076C8; BACKGROUND-COLOR: #F4FAFF; font-weight: bold'>");
+													var shipment_no =$("<td>");
+													$(shipment_no).text(data[i].shipment_no);
+													var shipped_qty = $("<td>");
+													$(shipped_qty).text(data[i].shipped_qty);
+													var status =$("<td>");
+													$(status).text(data[i].status==1?'已发货':'未发货');
+													var express_name = $("<td>");
+													$(express_name).text(data[i].express_name);
+													var express_code = $("<td>");
+													$(express_code).text(data[i].express_code);
+													$(tr).append($(shipment_no)).append($(shipped_qty))
+														.append($(status)).append($(express_name))
+														.append($(express_code));
+													$("#suborder").append($(tr));
+												}
+											}
+										}
+								});
+							}
+					});
+				},
+				toolbar:[{
+					id:'btnadd',
+					text:'新建订单',
+					iconCls:'icon-add',
+					handler:function(){
+						$('#neworder').dialog({
+							title: '新建订单',
+							width: 800,
+							height: 400,
+							closed: false,
+							cache: false,
+							href: 'neworder.html',
+							modal: true,
+							buttons:[{
+								text:'保存',
+								iconCls:'icon-ok',
+								handler:function(){
+									var fd = getFormData($("#newOrderForm"));
+									$.ajax({ 
+										url:"/atnew/ws/agencyOrder",
+										type:"post",
+										dataType:"text",
+										data:JSON.stringify(fd),
+										contentType:"application/json;charset=utf-8",
+										success:function( data ){
+											if( data == "true" ){
+												$.messager.alert('提醒','保存成功！');
+												$('#neworder').dialog("close");
+											} else{
+												$.messager.alert('警告','保存失败，请联系系统管理员！');  
+											}
+											$('#orders').datagrid('reload',{"pageSize": ps,"pageNo": pn,"params":gs.getQword()});
+										},
+										error: function (message) {
+											$.messager.alert('系统报警','保存失败，请联系系统管理员！');
+											$('#orders').datagrid('reload',{"pageSize": ps,"pageNo": pn,"params":gs.getQword()});
+										}
+									});
+								}
+							},{
+								text:'取消',
+								handler:function(){
+									$('#neworder').dialog('close');
+								}
+							}],
+							onClose:function(){
+									$("#neworder").dialog("destroy",false);
+									$(document.body).append($("<div id='neworder'>"));
+							},
+							onLoad:function(){
+								$("#province").combobox({
+									valueField:'id',  
+									textField:'text',
+									data:getProvince(),
+									onSelect:function( record ){
+										$("#city").combobox({
+											valueField:'id',  
+											textField:'text',
+											data:getCity(record.index),
+											onSelect:function(record){
+												$("#district").combobox({
+													valueField:'id',  
+													textField:'text',
+													data:getDistrict(record.index)
+												})
+											}
+										});
+									}
+								});
+								$.ajax({
+									url:"/wms/baseinfo/packages/agency/",
+									type:"get",
+									dataType:"json",
+									success:function( data ){
+										$("#order_type").combobox({
+											valueField:'package_code',
+											textField:'package_name',
+											data:data,
+											onSelect:function( record ){ 
+												var amount = record.package_price;
+												if( amount == "" || amount == undefined && amount == null ){
+													amount = 0;
+												}
+												$("#amount").val(amount);
+											}
+										});
+									}
+								});
+								
+								$("#order_no").val(UUID.prototype.createUUID ());
+								var date = getNowFormatDate();
+								$("#effective").val( date );
+								$("#create_time").val( date );
+							}
+						});
+					}
+				},
+				{
+					id:'btnedit',
+					text:'修改订单',
+					iconCls:'icon-edit',
+					handler:function(){
+						if(selected!= undefined){
+							$('#updateorder').dialog({
+								title: '修改订单',
+								width: 900,
+								height: 400,
+								cache: false,
+								href: 'updateorder.html',
+								modal: true,
+								buttons:[{
+									text:'保存',
+									iconCls:'icon-ok',
+									handler:function(){
+										var fd = getFormData($("#updateOrderForm"));
+										$.ajax({ 
+											url:"/atnew/ws/agencyOrder",
+											type:"put",
+											dataType:"text",
+											data:JSON.stringify(fd),
+											contentType:"application/json;charset=utf-8",
+											success:function( data ){
+												if( data == "true" ){
+													$.messager.alert('提醒','保存成功！');
+													$('#updateorder').dialog("close");
+												} else{
+													$.messager.alert('警告','保存失败，请联系系统管理员！');  
+												}
+											},
+											error: function (message) {
+												$.messager.alert('系统报警','保存失败，请联系系统管理员！');
+											}
+										});
+									}
+								},{
+									text:'取消',
+									handler:function(){
+										$('#updateorder').dialog('close');
+									}
+								}],
+								onClose:function(){
+									$("#updateorder").dialog("destroy",false);
+									$(document.body).append($("<div id='updateorder'>"));
+								},
+								onLoad:function(){
+									$("#province").combobox({
+										valueField:'id',  
+										textField:'text',
+										data:getProvince(),
+										onSelect:function( record ){
+											$("#city").combobox({
+												valueField:'id',  
+												textField:'text',
+												data:getCity(record.index),
+												onSelect:function(record){
+													$("#district").combobox({
+														valueField:'id',  
+														textField:'text',
+														data:getDistrict(record.index)
+													})
+												}
+											});
+										}
+									});
+									$.ajax({
+											url:"/wms/baseinfo/packages/agency/",
+											type:"get",
+											dataType:"json",
+											success:function( data ){
+												$("#order_type").combobox({
+													valueField:'package_code',
+													textField:'package_name',
+													data:data,
+													onSelect:function( record ){ 
+														var amount = record.package_price;
+														if( amount == "" || amount == undefined && amount == null ){
+															amount = 0;
+														}
+														$("#amount").val(amount);
+													}
+												});
+												$.ajax({
+													url:"/atnew/ws/agencyOrder/"+selected.id,
+													type:"get",
+													dataType:"json",
+													success:function( data ){
+															setFormData($("#updateOrderForm"),data);
+													}
+												});
+											}
+										});
+								}
+								
+							});
+						}
+					}
+				},{
+					id:'btnpay',
+					text:'支付',
+					iconCls:'icon-print',
+					handler:function(){
+						if(selected!= undefined){
+							window.open("/atnew/AlipayServlet?id="+selected.id); 
+						}
+					}
+				}]
+		});
+		var p = $('#orders').datagrid('getPager');
+		$(p).pagination({
+			pageNumber:pn,
+			pageSize:ps,
+			beforePageText:"第",
+			afterPageText:"页 共{pages}页",
+			displayMsg:"当前显示从{from}到{to}，共{total}记录",	
+			onSelectPage:function(pageNumber, pageSize){
+			//	loadResultData(pageNumber, pageSize, gs);
+				$('#orders').datagrid('reload',{"pageSize": pageSize,"pageNo": pageNumber,"params":gs.getQword()});
+			}
+		});
+	}
+
+</script>
+
+<body>
+
+	
+
+	<div id="listDiv" style="padding:30px;">
+		<table id="orders"></table>
+	</div>
+	
+	<div id="neworder">
+		
+	</div>
+
+	<div id="updateorder">
+		
+	</div>
+
+	<div id="singleorder">
+		
+	</div>
+</body>

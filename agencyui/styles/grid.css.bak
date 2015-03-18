@@ -1,0 +1,17 @@
+.query-block{margin-bottom:10px;border:1px solid #abafb8;background:#f9f9f9;font-family:Microsoft YaHei,SimSun;font-size:14px;}
+.query-title, .query-title-disabled{height:30px;width:50px;line-height:30px;padding-left:10px;cursor:pointer;background:#f9f9f9;clear:both;}
+.query-title-disabled{background:#E6E6E6;}
+.query-title .slide-tip, .query-title-disabled .slide-tip{height:30px;width:16px;margin-right:5px;background:url(../js/easyui/themes/metro-gray/images/accordion_arrows.png) -16px 7px no-repeat;}
+.query-title span, .query-title-disabled span{float:left;}
+.query-wrap{display:none;border-top:1px solid #abafb8;background:#fff;}
+.query-items{padding:10px;}
+.query-label{text-align:right;padding-right:5px;font-size:12px;padding-left:20px;}
+.query-input{text-align:left;padding-left:5px;font-size:12px;font-family:Microsoft YaHei,SimSun;padding:2px;}
+.query-input input,.query-input textarea,.query-input select{width:200px;}
+.query-input input.gs-radio{width:30px;}
+.query-input .gs-radio-label{margin-right:20px;}
+.query-input textarea{height:80px;}
+.gs-btn-wrap{background:#f9f9f9;padding:10px 0;border-top: 1px solid #ccc;text-align:center;}
+.query-btns{width:128px;margin:0 auto;height:22px;}
+.query-btns input{margin:0 10px;border: 1px solid #ccc;padding: 2px;width:40px;}
+.clear{clear:both;height:1px;margin-top:1px;overflow:hidden;}

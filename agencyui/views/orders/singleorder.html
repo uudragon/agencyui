@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+ <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="Generator" content="EditPlus®">
+	<meta name="Author" content="">
+	<meta name="Keywords" content="">
+	<meta name="Description" content="">
+	<title>查看订单</title>
+	
+ </head>
+ <body>
+	<form id="singleForm">
+		<table border="0" cellpadding="3" cellspacing="1" width="100%" align="center" style="background-color: #b9d8f3;">
+			<tr style="text-align: center; COLOR: #0076C8; BACKGROUND-COLOR: #F4FAFF; font-weight: bold">
+				<td><label for="order_no">订单编号：</label></td>
+				<td><input class="easyui-validatebox" type="text" name="order_no" readonly/></td>
+				<td><label for="source">订单来源：</label></td>
+				<td><select id="source" class="easyui-combobox" name="source" style="width:80px;" disabled>
+						<option value="31">本地录入</option>
+						<option value="32">网站广告</option>
+					</select></td>
+				</td>
+				<td><label for="create_time">下单时间:</label></td>
+				<td><input class="easyui-validatebox" type="text" name="create_time" readonly/></td>
+			</tr>
+			<tr style="text-align: center; COLOR: #0076C8; BACKGROUND-COLOR: #F4FAFF; font-weight: bold">
+				<td><label for="customer.name">客户姓名：</label></td>
+				<td><input class="easyui-validatebox" type="text" name="customer.name" readonly/></td>
+				<td><label for="customer.sex">客户性别：</label></td>
+				<td><select id="sex" class="easyui-combobox" name="customer.sex" style="width:50px;" disabled>
+						<option value="1">男</option>
+						<option value="0">女</option>
+					</select>
+				</td>
+				<td><label for="customer.phone">收货人电话：</label></td>
+				<td><input class="easyui-validatebox" type="text" name="customer.phone" readonly/></td>
+			</tr>
+			<tr style="text-align: center; COLOR: #0076C8; BACKGROUND-COLOR: #F4FAFF; font-weight: bold">
+				<td><label for="packag">订购类型：</label></td>
+				<td><input class="easyui-validatebox" type="text" id="packag" name="packag" readonly/></td>
+				<td><label for="amount">订单金额：</label></td>
+				<td><input class="easyui-validatebox" type="text" id="amount" name="amount" readonly/></td>
+				<td><label for="paid">支付状态：</label></td>
+				<td><select id="paid" name="paid"  class="easyui-combobox" disabled>
+						<option value="1">已支付</option>
+						<option value="0">未支付</option>
+					</select></td>
+			</tr>
+			<tr style="text-align: center; COLOR: #0076C8; BACKGROUND-COLOR: #F4FAFF; font-weight: bold">
+				<td><label for="customer.child">儿童姓名：</label></td>
+				<td><input class="easyui-validatebox" type="text" name="customer.child" readonly/></td>
+				<td><label for="customer.c_sex">儿童性别：</label></td>
+				<td>
+					<select id="c_sex" class="easyui-combobox" name="customer.c_sex" style="width:50px;" disabled>
+						<option value="1">男</option>
+						<option value="0">女</option>
+					</select>
+				</td>
+				<td><label for="customer.birthday">出生日期：</label></td>
+				<td><input id="birthday" type="text" name="customer.birthday" readonly></input></td>
+			</tr>
+			<tr style="text-align: center; COLOR: #0076C8; BACKGROUND-COLOR: #F4FAFF; font-weight: bold">
+				<td><label for="addr">详细地址：</label></td>
+				<td colspan="5">
+					<input id="province" class="easyui-validatebox" type="text" name="customer.province" style="width:68px;" disabled/>
+					<label for="customer.province">省</label>
+
+					<select id="city" class="easyui-combobox" name="customer.city" style="width:88px;" disabled>
+					</select>
+					<label for="customer.city">市</label>
+
+					<select id="district" class="easyui-combobox" name="customer.district" style="width:88px;" disabled>
+					</select>
+					<label for="customer.district">区</label>
+
+					<label for="customer.address">详细地址</label>
+					<input type="text" name="customer.address" required="true"/>
+				</td>
+			</tr>
+		</table>
+
+		<table id="suborder" border="0" cellpadding="3" cellspacing="1" width="100%" align="center" style="background-color: #b9d8f3;">
+			<tr style="text-align: center; COLOR: #0076C8; BACKGROUND-COLOR: #F4FAFF; font-weight: bold">
+				<td>子订单号</td>
+				<!--td>产品名称</td-->
+				<td>数量</td>
+				<td>发货状态</td>
+				<td>快递公司</td>
+				<td>快递单号</td>
+			</tr>
+		</table>
+	</form>
+ </body>
+</html>
